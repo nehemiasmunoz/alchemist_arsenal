@@ -1,10 +1,10 @@
-import 'package:alchemist_arsenal/data/source/sqlite/tables/ingredient.dart';
+import 'package:alchemist_arsenal/data/source/sqlite/tables/tables.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Ingredient])
+@DriftDatabase(tables: [Ingredient, Recipe, RecipeIngredient])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
