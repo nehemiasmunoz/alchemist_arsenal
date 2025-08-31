@@ -1,5 +1,5 @@
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
-import 'package:alchemist_arsenal/src/ingredient/screens/forms/ingredient_form.dart';
+import 'package:alchemist_arsenal/presentation/screens.dart';
 import 'package:flutter/material.dart';
 
 class EditIngredientScreen extends StatelessWidget {

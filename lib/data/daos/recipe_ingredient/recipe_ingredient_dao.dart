@@ -8,6 +8,8 @@ part 'recipe_ingredient_dao.g.dart';
 class RecipeIngredientDao extends DatabaseAccessor<AppDatabase>
     with _$RecipeIngredientDaoMixin {
   RecipeIngredientDao(super.attachedDatabase);
-}
 
-//
+  Future<List<Ingredient>> getIngredientsFromRecipeId(int id) {
+    return (select(recipeIngredient)..where((i) => i.recipeId == id)).get();
+  }
+}

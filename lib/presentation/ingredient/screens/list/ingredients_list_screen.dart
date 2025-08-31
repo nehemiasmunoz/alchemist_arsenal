@@ -1,6 +1,6 @@
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
-import 'package:alchemist_arsenal/src/ingredient/provider/ingredient_provider.dart';
-import 'package:alchemist_arsenal/src/ingredient/screens/forms/edit/edit_ingredient_screen.dart';
+import 'package:alchemist_arsenal/presentation/providers.dart';
+import 'package:alchemist_arsenal/presentation/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

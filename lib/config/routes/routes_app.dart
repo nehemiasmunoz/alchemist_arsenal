@@ -1,6 +1,4 @@
-import 'package:alchemist_arsenal/src/home/home_screen.dart';
-import 'package:alchemist_arsenal/src/ingredient/screens/list/ingredients_list_screen.dart';
-import 'package:alchemist_arsenal/src/recipe/screens/recipe_list_screen.dart';
+import 'package:alchemist_arsenal/presentation/screens.dart';
 import 'package:flutter/material.dart';
 
 class RoutesApp extends ChangeNotifier {

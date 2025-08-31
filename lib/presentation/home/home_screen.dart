@@ -1,6 +1,6 @@
 import 'package:alchemist_arsenal/config/routes/routes_app.dart';
-import 'package:alchemist_arsenal/src/ingredient/screens/forms/create/create_ingredient.dart';
-import 'package:alchemist_arsenal/src/widgets/widgets.dart';
+import 'package:alchemist_arsenal/presentation/screens.dart';
+import 'package:alchemist_arsenal/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

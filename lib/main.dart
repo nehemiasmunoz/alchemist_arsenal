@@ -1,8 +1,8 @@
 import 'package:alchemist_arsenal/config/routes/routes_app.dart';
 import 'package:alchemist_arsenal/data/daos/daos.dart';
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
-import 'package:alchemist_arsenal/domain/repository/ingredient_repository.dart';
-import 'package:alchemist_arsenal/src/ingredient/provider/ingredient_provider.dart';
+import 'package:alchemist_arsenal/domain/repository/repositories.dart';
+import 'package:alchemist_arsenal/presentation/ingredient/provider/ingredient_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

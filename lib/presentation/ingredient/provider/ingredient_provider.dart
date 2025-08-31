@@ -1,5 +1,5 @@
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
-import 'package:alchemist_arsenal/domain/repository/ingredient_repository.dart';
+import 'package:alchemist_arsenal/domain/repository/repositories.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 

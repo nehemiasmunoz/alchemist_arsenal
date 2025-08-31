@@ -1,5 +1,5 @@
-import 'package:alchemist_arsenal/src/ingredient/screens/forms/ingredient_form.dart';
-import 'package:alchemist_arsenal/src/widgets/widgets.dart';
+import 'package:alchemist_arsenal/presentation/screens.dart';
+import 'package:alchemist_arsenal/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class CreateIngredient extends StatelessWidget {
