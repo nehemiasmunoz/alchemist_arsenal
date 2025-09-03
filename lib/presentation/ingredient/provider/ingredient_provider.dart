@@ -1,9 +1,8 @@
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
 import 'package:alchemist_arsenal/domain/repository/repositories.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/material.dart';
 
-class IngredientProvider extends ChangeNotifier {
+class IngredientProvider {
   final IngredientRepository _ingredientRepo;
   IngredientData? recentDeletedIngredient;
   IngredientProvider(IngredientRepository ingredientRepo)

@@ -3,6 +3,7 @@ import 'package:alchemist_arsenal/data/daos/daos.dart';
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
 import 'package:alchemist_arsenal/domain/repository/repositories.dart';
 import 'package:alchemist_arsenal/presentation/ingredient/provider/ingredient_provider.dart';
+import 'package:alchemist_arsenal/presentation/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,10 +14,8 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        Provider(create: (_) => IngredientProvider(ingredientRepository)),
         ChangeNotifierProvider(create: (_) => RoutesApp()),
-        ChangeNotifierProvider(
-          create: (_) => IngredientProvider(ingredientRepository),
-        ),
       ],
       child: const MainApp(),
     ),
@@ -28,9 +27,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      initialRoute: RoutesApp.initialRoute,
-      routes: RoutesApp.routes,
-    );
+    return MaterialApp(home: HomeScreen());
   }
 }

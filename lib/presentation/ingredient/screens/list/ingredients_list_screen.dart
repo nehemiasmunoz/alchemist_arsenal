@@ -1,3 +1,4 @@
+import 'package:alchemist_arsenal/config/routes/routes_app.dart';
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
 import 'package:alchemist_arsenal/presentation/providers.dart';
 import 'package:alchemist_arsenal/presentation/screens.dart';
@@ -12,47 +13,55 @@ class IngredientsListScreen extends StatelessWidget {
     return StreamProvider<List<IngredientData>>(
       initialData: const [],
       create: (context) => context.read<IngredientProvider>().watchAll,
-      child: Scaffold(
-        appBar: AppBar(title: Text("Ingredients")),
-        body: Consumer<List<IngredientData>>(
-          builder: (context, ingredients, child) {
-            if (ingredients.isEmpty) {
-              return Center(child: Text("No ingredients found."));
-            }
-            return ListView.builder(
-              itemCount: ingredients.length,
-              itemBuilder: (ctx, i) => Card(
-                child: Dismissible(
-                  background: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.red[300],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Delete ${ingredients[i].title}".toUpperCase(),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const Icon(Icons.delete, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                  onDismissed: (direction) {
-                    context.read<IngredientProvider>().deleteIngredient(
-                      ingredients[i].id,
-                    );
-                  },
-                  key: Key(ingredients[i].toString()),
-                  child: _IngredientItem(ingredient: ingredients[i]),
-                ),
+      child: Consumer<List<IngredientData>>(
+        builder: (context, ingredients, child) {
+          if (ingredients.isEmpty) {
+            return Center(child: Text("No ingredients found."));
+          }
+          return ListView.builder(
+            itemCount: ingredients.length,
+            itemBuilder: (ctx, i) {
+              return _DismissibleIngredientItem(ingredient: ingredients[i]);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DismissibleIngredientItem extends StatelessWidget {
+  const _DismissibleIngredientItem({required this.ingredient});
+
+  final IngredientData ingredient;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Dismissible(
+        background: Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.red[300],
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Delete ${ingredient.title}".toUpperCase(),
+                style: TextStyle(color: Colors.white),
               ),
-            );
-          },
+              const Icon(Icons.delete, color: Colors.white),
+            ],
+          ),
         ),
+        onDismissed: (direction) {
+          context.read<IngredientProvider>().deleteIngredient(ingredient.id);
+        },
+        key: Key(ingredient.toString()),
+        child: _IngredientItem(ingredient: ingredient),
       ),
     );
   }
@@ -61,16 +70,20 @@ class IngredientsListScreen extends StatelessWidget {
 class _IngredientItem extends StatelessWidget {
   final IngredientData ingredient;
 
-  const _IngredientItem({super.key, required this.ingredient});
+  const _IngredientItem({required this.ingredient});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (ctx) => EditIngredientScreen(oldDataIngredient: ingredient),
-        ),
-      ),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (ctx) =>
+                CreateEditIngredientScreen(oldDataIngredient: ingredient),
+          ),
+        );
+        context.read<RoutesApp>().changeOptionsVisibility(false);
+      },
       trailing: Text(
         "${ingredient.price}\$",
         overflow: TextOverflow.fade,
