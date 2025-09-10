@@ -13,16 +13,16 @@ class IngredientDao extends DatabaseAccessor<AppDatabase>
     return (select(ingredient)).watch();
   }
 
-  Future<void> saveIngredient(IngredientCompanion newIngredient) {
-    return into(ingredient).insert(newIngredient);
+  Future<int> saveIngredient(IngredientCompanion newIngredient) async {
+    return await into(ingredient).insert(newIngredient);
   }
 
-  Future<void> updateIngredient(IngredientCompanion newIngredient) {
-    return update(ingredient).replace(newIngredient);
+  Future<bool> updateIngredient(IngredientCompanion newIngredient) async {
+    return await update(ingredient).replace(newIngredient);
   }
 
-  Future<void> deleteIngredient(int id) {
-    return (delete(
+  Future<int> deleteIngredient(int id) async {
+    return await (delete(
       ingredient,
     )..where((ingredient) => ingredient.id.equals(id))).go();
   }

@@ -12,19 +12,19 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     return (select(recipe)).watch();
   }
 
-  Future<RecipeData> getRecipeById(int id) {
-    return (select(recipe)..where((r) => r.id.equals(id))).getSingle();
+  Future<RecipeData> getRecipeById(int id) async {
+    return await (select(recipe)..where((r) => r.id.equals(id))).getSingle();
   }
 
-  Future<void> saveRecipe(RecipeCompanion newRecipe) {
-    return into(recipe).insert(newRecipe);
+  Future<int> saveRecipe(RecipeCompanion newRecipe) async {
+    return await into(recipe).insert(newRecipe);
   }
 
-  Future<void> updateRecipe(RecipeCompanion newRecipe) {
-    return update(recipe).replace(newRecipe);
+  Future<bool> updateRecipe(RecipeCompanion newRecipe) async {
+    return await update(recipe).replace(newRecipe);
   }
 
-  Future<void> deleteRecipe(int id) {
-    return (delete(recipe)..where((recipe) => recipe.id.equals(id))).go();
+  Future<int> deleteRecipe(int id) async {
+    return await (delete(recipe)..where((recipe) => recipe.id.equals(id))).go();
   }
 }
