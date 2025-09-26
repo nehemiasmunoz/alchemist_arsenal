@@ -394,9 +394,9 @@ class $RecipeTable extends Recipe with TableInfo<$RecipeTable, RecipeData> {
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
     'description',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _instructionsMeta = const VerificationMeta(
     'instructions',
@@ -442,6 +442,8 @@ class $RecipeTable extends Recipe with TableInfo<$RecipeTable, RecipeData> {
           _descriptionMeta,
         ),
       );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
     }
     if (data.containsKey('instructions')) {
       context.handle(
@@ -474,7 +476,7 @@ class $RecipeTable extends Recipe with TableInfo<$RecipeTable, RecipeData> {
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
-      ),
+      )!,
       instructions: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}instructions'],
@@ -491,12 +493,12 @@ class $RecipeTable extends Recipe with TableInfo<$RecipeTable, RecipeData> {
 class RecipeData extends DataClass implements Insertable<RecipeData> {
   final int id;
   final String title;
-  final String? description;
+  final String description;
   final String instructions;
   const RecipeData({
     required this.id,
     required this.title,
-    this.description,
+    required this.description,
     required this.instructions,
   });
   @override
@@ -504,9 +506,7 @@ class RecipeData extends DataClass implements Insertable<RecipeData> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['title'] = Variable<String>(title);
-    if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String>(description);
-    }
+    map['description'] = Variable<String>(description);
     map['instructions'] = Variable<String>(instructions);
     return map;
   }
@@ -515,9 +515,7 @@ class RecipeData extends DataClass implements Insertable<RecipeData> {
     return RecipeCompanion(
       id: Value(id),
       title: Value(title),
-      description: description == null && nullToAbsent
-          ? const Value.absent()
-          : Value(description),
+      description: Value(description),
       instructions: Value(instructions),
     );
   }
@@ -530,7 +528,7 @@ class RecipeData extends DataClass implements Insertable<RecipeData> {
     return RecipeData(
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
-      description: serializer.fromJson<String?>(json['description']),
+      description: serializer.fromJson<String>(json['description']),
       instructions: serializer.fromJson<String>(json['instructions']),
     );
   }
@@ -540,7 +538,7 @@ class RecipeData extends DataClass implements Insertable<RecipeData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
-      'description': serializer.toJson<String?>(description),
+      'description': serializer.toJson<String>(description),
       'instructions': serializer.toJson<String>(instructions),
     };
   }
@@ -548,12 +546,12 @@ class RecipeData extends DataClass implements Insertable<RecipeData> {
   RecipeData copyWith({
     int? id,
     String? title,
-    Value<String?> description = const Value.absent(),
+    String? description,
     String? instructions,
   }) => RecipeData(
     id: id ?? this.id,
     title: title ?? this.title,
-    description: description.present ? description.value : this.description,
+    description: description ?? this.description,
     instructions: instructions ?? this.instructions,
   );
   RecipeData copyWithCompanion(RecipeCompanion data) {
@@ -595,7 +593,7 @@ class RecipeData extends DataClass implements Insertable<RecipeData> {
 class RecipeCompanion extends UpdateCompanion<RecipeData> {
   final Value<int> id;
   final Value<String> title;
-  final Value<String?> description;
+  final Value<String> description;
   final Value<String> instructions;
   const RecipeCompanion({
     this.id = const Value.absent(),
@@ -606,9 +604,10 @@ class RecipeCompanion extends UpdateCompanion<RecipeData> {
   RecipeCompanion.insert({
     this.id = const Value.absent(),
     required String title,
-    this.description = const Value.absent(),
+    required String description,
     required String instructions,
   }) : title = Value(title),
+       description = Value(description),
        instructions = Value(instructions);
   static Insertable<RecipeData> custom({
     Expression<int>? id,
@@ -627,7 +626,7 @@ class RecipeCompanion extends UpdateCompanion<RecipeData> {
   RecipeCompanion copyWith({
     Value<int>? id,
     Value<String>? title,
-    Value<String?>? description,
+    Value<String>? description,
     Value<String>? instructions,
   }) {
     return RecipeCompanion(
@@ -668,6 +667,317 @@ class RecipeCompanion extends UpdateCompanion<RecipeData> {
   }
 }
 
+class $UnitOfMeasureTable extends UnitOfMeasure
+    with TableInfo<$UnitOfMeasureTable, UnitOfMeasureData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UnitOfMeasureTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  @override
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+    'symbol',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, symbol, name, description];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'unit_of_measure';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UnitOfMeasureData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('symbol')) {
+      context.handle(
+        _symbolMeta,
+        symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UnitOfMeasureData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UnitOfMeasureData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+    );
+  }
+
+  @override
+  $UnitOfMeasureTable createAlias(String alias) {
+    return $UnitOfMeasureTable(attachedDatabase, alias);
+  }
+}
+
+class UnitOfMeasureData extends DataClass
+    implements Insertable<UnitOfMeasureData> {
+  final int id;
+  final String symbol;
+  final String name;
+  final String? description;
+  const UnitOfMeasureData({
+    required this.id,
+    required this.symbol,
+    required this.name,
+    this.description,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['symbol'] = Variable<String>(symbol);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    return map;
+  }
+
+  UnitOfMeasureCompanion toCompanion(bool nullToAbsent) {
+    return UnitOfMeasureCompanion(
+      id: Value(id),
+      symbol: Value(symbol),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+    );
+  }
+
+  factory UnitOfMeasureData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UnitOfMeasureData(
+      id: serializer.fromJson<int>(json['id']),
+      symbol: serializer.fromJson<String>(json['symbol']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'symbol': serializer.toJson<String>(symbol),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+    };
+  }
+
+  UnitOfMeasureData copyWith({
+    int? id,
+    String? symbol,
+    String? name,
+    Value<String?> description = const Value.absent(),
+  }) => UnitOfMeasureData(
+    id: id ?? this.id,
+    symbol: symbol ?? this.symbol,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+  );
+  UnitOfMeasureData copyWithCompanion(UnitOfMeasureCompanion data) {
+    return UnitOfMeasureData(
+      id: data.id.present ? data.id.value : this.id,
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UnitOfMeasureData(')
+          ..write('id: $id, ')
+          ..write('symbol: $symbol, ')
+          ..write('name: $name, ')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, symbol, name, description);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UnitOfMeasureData &&
+          other.id == this.id &&
+          other.symbol == this.symbol &&
+          other.name == this.name &&
+          other.description == this.description);
+}
+
+class UnitOfMeasureCompanion extends UpdateCompanion<UnitOfMeasureData> {
+  final Value<int> id;
+  final Value<String> symbol;
+  final Value<String> name;
+  final Value<String?> description;
+  const UnitOfMeasureCompanion({
+    this.id = const Value.absent(),
+    this.symbol = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+  });
+  UnitOfMeasureCompanion.insert({
+    this.id = const Value.absent(),
+    required String symbol,
+    required String name,
+    this.description = const Value.absent(),
+  }) : symbol = Value(symbol),
+       name = Value(name);
+  static Insertable<UnitOfMeasureData> custom({
+    Expression<int>? id,
+    Expression<String>? symbol,
+    Expression<String>? name,
+    Expression<String>? description,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (symbol != null) 'symbol': symbol,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+    });
+  }
+
+  UnitOfMeasureCompanion copyWith({
+    Value<int>? id,
+    Value<String>? symbol,
+    Value<String>? name,
+    Value<String?>? description,
+  }) {
+    return UnitOfMeasureCompanion(
+      id: id ?? this.id,
+      symbol: symbol ?? this.symbol,
+      name: name ?? this.name,
+      description: description ?? this.description,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UnitOfMeasureCompanion(')
+          ..write('id: $id, ')
+          ..write('symbol: $symbol, ')
+          ..write('name: $name, ')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $RecipeIngredientTable extends RecipeIngredient
     with TableInfo<$RecipeIngredientTable, RecipeIngredientData> {
   @override
@@ -687,16 +997,47 @@ class $RecipeIngredientTable extends RecipeIngredient
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _unitOfMeasureMeta = const VerificationMeta(
-    'unitOfMeasure',
+  static const VerificationMeta _recipeIdMeta = const VerificationMeta(
+    'recipeId',
   );
   @override
-  late final GeneratedColumn<String> unitOfMeasure = GeneratedColumn<String>(
-    'unit_of_measure',
+  late final GeneratedColumn<int> recipeId = GeneratedColumn<int>(
+    'recipe_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES recipe (id)',
+    ),
+  );
+  static const VerificationMeta _ingredientIdMeta = const VerificationMeta(
+    'ingredientId',
+  );
+  @override
+  late final GeneratedColumn<int> ingredientId = GeneratedColumn<int>(
+    'ingredient_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES ingredient (id)',
+    ),
+  );
+  static const VerificationMeta _unitOfMeasureIdMeta = const VerificationMeta(
+    'unitOfMeasureId',
+  );
+  @override
+  late final GeneratedColumn<int> unitOfMeasureId = GeneratedColumn<int>(
+    'unit_of_measure_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES unit_of_measure (id)',
+    ),
   );
   static const VerificationMeta _quantityMeta = const VerificationMeta(
     'quantity',
@@ -710,7 +1051,13 @@ class $RecipeIngredientTable extends RecipeIngredient
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, unitOfMeasure, quantity];
+  List<GeneratedColumn> get $columns => [
+    id,
+    recipeId,
+    ingredientId,
+    unitOfMeasureId,
+    quantity,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -726,16 +1073,35 @@ class $RecipeIngredientTable extends RecipeIngredient
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('unit_of_measure')) {
+    if (data.containsKey('recipe_id')) {
       context.handle(
-        _unitOfMeasureMeta,
-        unitOfMeasure.isAcceptableOrUnknown(
-          data['unit_of_measure']!,
-          _unitOfMeasureMeta,
+        _recipeIdMeta,
+        recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
+    }
+    if (data.containsKey('ingredient_id')) {
+      context.handle(
+        _ingredientIdMeta,
+        ingredientId.isAcceptableOrUnknown(
+          data['ingredient_id']!,
+          _ingredientIdMeta,
         ),
       );
     } else if (isInserting) {
-      context.missing(_unitOfMeasureMeta);
+      context.missing(_ingredientIdMeta);
+    }
+    if (data.containsKey('unit_of_measure_id')) {
+      context.handle(
+        _unitOfMeasureIdMeta,
+        unitOfMeasureId.isAcceptableOrUnknown(
+          data['unit_of_measure_id']!,
+          _unitOfMeasureIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_unitOfMeasureIdMeta);
     }
     if (data.containsKey('quantity')) {
       context.handle(
@@ -758,9 +1124,17 @@ class $RecipeIngredientTable extends RecipeIngredient
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      unitOfMeasure: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}unit_of_measure'],
+      recipeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recipe_id'],
+      )!,
+      ingredientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ingredient_id'],
+      )!,
+      unitOfMeasureId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unit_of_measure_id'],
       )!,
       quantity: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
@@ -778,18 +1152,24 @@ class $RecipeIngredientTable extends RecipeIngredient
 class RecipeIngredientData extends DataClass
     implements Insertable<RecipeIngredientData> {
   final int id;
-  final String unitOfMeasure;
+  final int recipeId;
+  final int ingredientId;
+  final int unitOfMeasureId;
   final double quantity;
   const RecipeIngredientData({
     required this.id,
-    required this.unitOfMeasure,
+    required this.recipeId,
+    required this.ingredientId,
+    required this.unitOfMeasureId,
     required this.quantity,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['unit_of_measure'] = Variable<String>(unitOfMeasure);
+    map['recipe_id'] = Variable<int>(recipeId);
+    map['ingredient_id'] = Variable<int>(ingredientId);
+    map['unit_of_measure_id'] = Variable<int>(unitOfMeasureId);
     map['quantity'] = Variable<double>(quantity);
     return map;
   }
@@ -797,7 +1177,9 @@ class RecipeIngredientData extends DataClass
   RecipeIngredientCompanion toCompanion(bool nullToAbsent) {
     return RecipeIngredientCompanion(
       id: Value(id),
-      unitOfMeasure: Value(unitOfMeasure),
+      recipeId: Value(recipeId),
+      ingredientId: Value(ingredientId),
+      unitOfMeasureId: Value(unitOfMeasureId),
       quantity: Value(quantity),
     );
   }
@@ -809,7 +1191,9 @@ class RecipeIngredientData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RecipeIngredientData(
       id: serializer.fromJson<int>(json['id']),
-      unitOfMeasure: serializer.fromJson<String>(json['unitOfMeasure']),
+      recipeId: serializer.fromJson<int>(json['recipeId']),
+      ingredientId: serializer.fromJson<int>(json['ingredientId']),
+      unitOfMeasureId: serializer.fromJson<int>(json['unitOfMeasureId']),
       quantity: serializer.fromJson<double>(json['quantity']),
     );
   }
@@ -818,26 +1202,36 @@ class RecipeIngredientData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'unitOfMeasure': serializer.toJson<String>(unitOfMeasure),
+      'recipeId': serializer.toJson<int>(recipeId),
+      'ingredientId': serializer.toJson<int>(ingredientId),
+      'unitOfMeasureId': serializer.toJson<int>(unitOfMeasureId),
       'quantity': serializer.toJson<double>(quantity),
     };
   }
 
   RecipeIngredientData copyWith({
     int? id,
-    String? unitOfMeasure,
+    int? recipeId,
+    int? ingredientId,
+    int? unitOfMeasureId,
     double? quantity,
   }) => RecipeIngredientData(
     id: id ?? this.id,
-    unitOfMeasure: unitOfMeasure ?? this.unitOfMeasure,
+    recipeId: recipeId ?? this.recipeId,
+    ingredientId: ingredientId ?? this.ingredientId,
+    unitOfMeasureId: unitOfMeasureId ?? this.unitOfMeasureId,
     quantity: quantity ?? this.quantity,
   );
   RecipeIngredientData copyWithCompanion(RecipeIngredientCompanion data) {
     return RecipeIngredientData(
       id: data.id.present ? data.id.value : this.id,
-      unitOfMeasure: data.unitOfMeasure.present
-          ? data.unitOfMeasure.value
-          : this.unitOfMeasure,
+      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
+      ingredientId: data.ingredientId.present
+          ? data.ingredientId.value
+          : this.ingredientId,
+      unitOfMeasureId: data.unitOfMeasureId.present
+          ? data.unitOfMeasureId.value
+          : this.unitOfMeasureId,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
     );
   }
@@ -846,58 +1240,79 @@ class RecipeIngredientData extends DataClass
   String toString() {
     return (StringBuffer('RecipeIngredientData(')
           ..write('id: $id, ')
-          ..write('unitOfMeasure: $unitOfMeasure, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('ingredientId: $ingredientId, ')
+          ..write('unitOfMeasureId: $unitOfMeasureId, ')
           ..write('quantity: $quantity')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, unitOfMeasure, quantity);
+  int get hashCode =>
+      Object.hash(id, recipeId, ingredientId, unitOfMeasureId, quantity);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RecipeIngredientData &&
           other.id == this.id &&
-          other.unitOfMeasure == this.unitOfMeasure &&
+          other.recipeId == this.recipeId &&
+          other.ingredientId == this.ingredientId &&
+          other.unitOfMeasureId == this.unitOfMeasureId &&
           other.quantity == this.quantity);
 }
 
 class RecipeIngredientCompanion extends UpdateCompanion<RecipeIngredientData> {
   final Value<int> id;
-  final Value<String> unitOfMeasure;
+  final Value<int> recipeId;
+  final Value<int> ingredientId;
+  final Value<int> unitOfMeasureId;
   final Value<double> quantity;
   const RecipeIngredientCompanion({
     this.id = const Value.absent(),
-    this.unitOfMeasure = const Value.absent(),
+    this.recipeId = const Value.absent(),
+    this.ingredientId = const Value.absent(),
+    this.unitOfMeasureId = const Value.absent(),
     this.quantity = const Value.absent(),
   });
   RecipeIngredientCompanion.insert({
     this.id = const Value.absent(),
-    required String unitOfMeasure,
+    required int recipeId,
+    required int ingredientId,
+    required int unitOfMeasureId,
     required double quantity,
-  }) : unitOfMeasure = Value(unitOfMeasure),
+  }) : recipeId = Value(recipeId),
+       ingredientId = Value(ingredientId),
+       unitOfMeasureId = Value(unitOfMeasureId),
        quantity = Value(quantity);
   static Insertable<RecipeIngredientData> custom({
     Expression<int>? id,
-    Expression<String>? unitOfMeasure,
+    Expression<int>? recipeId,
+    Expression<int>? ingredientId,
+    Expression<int>? unitOfMeasureId,
     Expression<double>? quantity,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (unitOfMeasure != null) 'unit_of_measure': unitOfMeasure,
+      if (recipeId != null) 'recipe_id': recipeId,
+      if (ingredientId != null) 'ingredient_id': ingredientId,
+      if (unitOfMeasureId != null) 'unit_of_measure_id': unitOfMeasureId,
       if (quantity != null) 'quantity': quantity,
     });
   }
 
   RecipeIngredientCompanion copyWith({
     Value<int>? id,
-    Value<String>? unitOfMeasure,
+    Value<int>? recipeId,
+    Value<int>? ingredientId,
+    Value<int>? unitOfMeasureId,
     Value<double>? quantity,
   }) {
     return RecipeIngredientCompanion(
       id: id ?? this.id,
-      unitOfMeasure: unitOfMeasure ?? this.unitOfMeasure,
+      recipeId: recipeId ?? this.recipeId,
+      ingredientId: ingredientId ?? this.ingredientId,
+      unitOfMeasureId: unitOfMeasureId ?? this.unitOfMeasureId,
       quantity: quantity ?? this.quantity,
     );
   }
@@ -908,8 +1323,14 @@ class RecipeIngredientCompanion extends UpdateCompanion<RecipeIngredientData> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (unitOfMeasure.present) {
-      map['unit_of_measure'] = Variable<String>(unitOfMeasure.value);
+    if (recipeId.present) {
+      map['recipe_id'] = Variable<int>(recipeId.value);
+    }
+    if (ingredientId.present) {
+      map['ingredient_id'] = Variable<int>(ingredientId.value);
+    }
+    if (unitOfMeasureId.present) {
+      map['unit_of_measure_id'] = Variable<int>(unitOfMeasureId.value);
     }
     if (quantity.present) {
       map['quantity'] = Variable<double>(quantity.value);
@@ -921,7 +1342,9 @@ class RecipeIngredientCompanion extends UpdateCompanion<RecipeIngredientData> {
   String toString() {
     return (StringBuffer('RecipeIngredientCompanion(')
           ..write('id: $id, ')
-          ..write('unitOfMeasure: $unitOfMeasure, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('ingredientId: $ingredientId, ')
+          ..write('unitOfMeasureId: $unitOfMeasureId, ')
           ..write('quantity: $quantity')
           ..write(')'))
         .toString();
@@ -933,6 +1356,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $IngredientTable ingredient = $IngredientTable(this);
   late final $RecipeTable recipe = $RecipeTable(this);
+  late final $UnitOfMeasureTable unitOfMeasure = $UnitOfMeasureTable(this);
   late final $RecipeIngredientTable recipeIngredient = $RecipeIngredientTable(
     this,
   );
@@ -943,6 +1367,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     ingredient,
     recipe,
+    unitOfMeasure,
     recipeIngredient,
   ];
 }
@@ -963,6 +1388,34 @@ typedef $$IngredientTableUpdateCompanionBuilder =
       Value<double> price,
       Value<String?> properties,
     });
+
+final class $$IngredientTableReferences
+    extends BaseReferences<_$AppDatabase, $IngredientTable, IngredientData> {
+  $$IngredientTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$RecipeIngredientTable, List<RecipeIngredientData>>
+  _recipeIngredientRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.recipeIngredient,
+    aliasName: $_aliasNameGenerator(
+      db.ingredient.id,
+      db.recipeIngredient.ingredientId,
+    ),
+  );
+
+  $$RecipeIngredientTableProcessedTableManager get recipeIngredientRefs {
+    final manager = $$RecipeIngredientTableTableManager(
+      $_db,
+      $_db.recipeIngredient,
+    ).filter((f) => f.ingredientId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _recipeIngredientRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$IngredientTableFilterComposer
     extends Composer<_$AppDatabase, $IngredientTable> {
@@ -997,6 +1450,31 @@ class $$IngredientTableFilterComposer
     column: $table.properties,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> recipeIngredientRefs(
+    Expression<bool> Function($$RecipeIngredientTableFilterComposer f) f,
+  ) {
+    final $$RecipeIngredientTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recipeIngredient,
+      getReferencedColumn: (t) => t.ingredientId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeIngredientTableFilterComposer(
+            $db: $db,
+            $table: $db.recipeIngredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$IngredientTableOrderingComposer
@@ -1061,6 +1539,31 @@ class $$IngredientTableAnnotationComposer
     column: $table.properties,
     builder: (column) => column,
   );
+
+  Expression<T> recipeIngredientRefs<T extends Object>(
+    Expression<T> Function($$RecipeIngredientTableAnnotationComposer a) f,
+  ) {
+    final $$RecipeIngredientTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recipeIngredient,
+      getReferencedColumn: (t) => t.ingredientId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeIngredientTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recipeIngredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$IngredientTableTableManager
@@ -1074,12 +1577,9 @@ class $$IngredientTableTableManager
           $$IngredientTableAnnotationComposer,
           $$IngredientTableCreateCompanionBuilder,
           $$IngredientTableUpdateCompanionBuilder,
-          (
-            IngredientData,
-            BaseReferences<_$AppDatabase, $IngredientTable, IngredientData>,
-          ),
+          (IngredientData, $$IngredientTableReferences),
           IngredientData,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool recipeIngredientRefs})
         > {
   $$IngredientTableTableManager(_$AppDatabase db, $IngredientTable table)
     : super(
@@ -1121,9 +1621,47 @@ class $$IngredientTableTableManager
                 properties: properties,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$IngredientTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({recipeIngredientRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (recipeIngredientRefs) db.recipeIngredient,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (recipeIngredientRefs)
+                    await $_getPrefetchedData<
+                      IngredientData,
+                      $IngredientTable,
+                      RecipeIngredientData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$IngredientTableReferences
+                          ._recipeIngredientRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$IngredientTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).recipeIngredientRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.ingredientId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -1138,27 +1676,49 @@ typedef $$IngredientTableProcessedTableManager =
       $$IngredientTableAnnotationComposer,
       $$IngredientTableCreateCompanionBuilder,
       $$IngredientTableUpdateCompanionBuilder,
-      (
-        IngredientData,
-        BaseReferences<_$AppDatabase, $IngredientTable, IngredientData>,
-      ),
+      (IngredientData, $$IngredientTableReferences),
       IngredientData,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool recipeIngredientRefs})
     >;
 typedef $$RecipeTableCreateCompanionBuilder =
     RecipeCompanion Function({
       Value<int> id,
       required String title,
-      Value<String?> description,
+      required String description,
       required String instructions,
     });
 typedef $$RecipeTableUpdateCompanionBuilder =
     RecipeCompanion Function({
       Value<int> id,
       Value<String> title,
-      Value<String?> description,
+      Value<String> description,
       Value<String> instructions,
     });
+
+final class $$RecipeTableReferences
+    extends BaseReferences<_$AppDatabase, $RecipeTable, RecipeData> {
+  $$RecipeTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$RecipeIngredientTable, List<RecipeIngredientData>>
+  _recipeIngredientRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.recipeIngredient,
+    aliasName: $_aliasNameGenerator(db.recipe.id, db.recipeIngredient.recipeId),
+  );
+
+  $$RecipeIngredientTableProcessedTableManager get recipeIngredientRefs {
+    final manager = $$RecipeIngredientTableTableManager(
+      $_db,
+      $_db.recipeIngredient,
+    ).filter((f) => f.recipeId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _recipeIngredientRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$RecipeTableFilterComposer
     extends Composer<_$AppDatabase, $RecipeTable> {
@@ -1188,6 +1748,31 @@ class $$RecipeTableFilterComposer
     column: $table.instructions,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> recipeIngredientRefs(
+    Expression<bool> Function($$RecipeIngredientTableFilterComposer f) f,
+  ) {
+    final $$RecipeIngredientTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recipeIngredient,
+      getReferencedColumn: (t) => t.recipeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeIngredientTableFilterComposer(
+            $db: $db,
+            $table: $db.recipeIngredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$RecipeTableOrderingComposer
@@ -1244,6 +1829,31 @@ class $$RecipeTableAnnotationComposer
     column: $table.instructions,
     builder: (column) => column,
   );
+
+  Expression<T> recipeIngredientRefs<T extends Object>(
+    Expression<T> Function($$RecipeIngredientTableAnnotationComposer a) f,
+  ) {
+    final $$RecipeIngredientTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recipeIngredient,
+      getReferencedColumn: (t) => t.recipeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeIngredientTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recipeIngredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$RecipeTableTableManager
@@ -1257,9 +1867,9 @@ class $$RecipeTableTableManager
           $$RecipeTableAnnotationComposer,
           $$RecipeTableCreateCompanionBuilder,
           $$RecipeTableUpdateCompanionBuilder,
-          (RecipeData, BaseReferences<_$AppDatabase, $RecipeTable, RecipeData>),
+          (RecipeData, $$RecipeTableReferences),
           RecipeData,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool recipeIngredientRefs})
         > {
   $$RecipeTableTableManager(_$AppDatabase db, $RecipeTable table)
     : super(
@@ -1276,7 +1886,7 @@ class $$RecipeTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
-                Value<String?> description = const Value.absent(),
+                Value<String> description = const Value.absent(),
                 Value<String> instructions = const Value.absent(),
               }) => RecipeCompanion(
                 id: id,
@@ -1288,7 +1898,7 @@ class $$RecipeTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String title,
-                Value<String?> description = const Value.absent(),
+                required String description,
                 required String instructions,
               }) => RecipeCompanion.insert(
                 id: id,
@@ -1297,9 +1907,42 @@ class $$RecipeTableTableManager
                 instructions: instructions,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) =>
+                    (e.readTable(table), $$RecipeTableReferences(db, table, e)),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({recipeIngredientRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (recipeIngredientRefs) db.recipeIngredient,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (recipeIngredientRefs)
+                    await $_getPrefetchedData<
+                      RecipeData,
+                      $RecipeTable,
+                      RecipeIngredientData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$RecipeTableReferences
+                          ._recipeIngredientRefsTable(db),
+                      managerFromTypedResult: (p0) => $$RecipeTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).recipeIngredientRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.recipeId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -1314,22 +1957,394 @@ typedef $$RecipeTableProcessedTableManager =
       $$RecipeTableAnnotationComposer,
       $$RecipeTableCreateCompanionBuilder,
       $$RecipeTableUpdateCompanionBuilder,
-      (RecipeData, BaseReferences<_$AppDatabase, $RecipeTable, RecipeData>),
+      (RecipeData, $$RecipeTableReferences),
       RecipeData,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool recipeIngredientRefs})
+    >;
+typedef $$UnitOfMeasureTableCreateCompanionBuilder =
+    UnitOfMeasureCompanion Function({
+      Value<int> id,
+      required String symbol,
+      required String name,
+      Value<String?> description,
+    });
+typedef $$UnitOfMeasureTableUpdateCompanionBuilder =
+    UnitOfMeasureCompanion Function({
+      Value<int> id,
+      Value<String> symbol,
+      Value<String> name,
+      Value<String?> description,
+    });
+
+final class $$UnitOfMeasureTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $UnitOfMeasureTable, UnitOfMeasureData> {
+  $$UnitOfMeasureTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$RecipeIngredientTable, List<RecipeIngredientData>>
+  _recipeIngredientRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.recipeIngredient,
+    aliasName: $_aliasNameGenerator(
+      db.unitOfMeasure.id,
+      db.recipeIngredient.unitOfMeasureId,
+    ),
+  );
+
+  $$RecipeIngredientTableProcessedTableManager get recipeIngredientRefs {
+    final manager = $$RecipeIngredientTableTableManager(
+      $_db,
+      $_db.recipeIngredient,
+    ).filter((f) => f.unitOfMeasureId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _recipeIngredientRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$UnitOfMeasureTableFilterComposer
+    extends Composer<_$AppDatabase, $UnitOfMeasureTable> {
+  $$UnitOfMeasureTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> recipeIngredientRefs(
+    Expression<bool> Function($$RecipeIngredientTableFilterComposer f) f,
+  ) {
+    final $$RecipeIngredientTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recipeIngredient,
+      getReferencedColumn: (t) => t.unitOfMeasureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeIngredientTableFilterComposer(
+            $db: $db,
+            $table: $db.recipeIngredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$UnitOfMeasureTableOrderingComposer
+    extends Composer<_$AppDatabase, $UnitOfMeasureTable> {
+  $$UnitOfMeasureTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get symbol => $composableBuilder(
+    column: $table.symbol,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UnitOfMeasureTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UnitOfMeasureTable> {
+  $$UnitOfMeasureTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get symbol =>
+      $composableBuilder(column: $table.symbol, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  Expression<T> recipeIngredientRefs<T extends Object>(
+    Expression<T> Function($$RecipeIngredientTableAnnotationComposer a) f,
+  ) {
+    final $$RecipeIngredientTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recipeIngredient,
+      getReferencedColumn: (t) => t.unitOfMeasureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeIngredientTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recipeIngredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$UnitOfMeasureTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UnitOfMeasureTable,
+          UnitOfMeasureData,
+          $$UnitOfMeasureTableFilterComposer,
+          $$UnitOfMeasureTableOrderingComposer,
+          $$UnitOfMeasureTableAnnotationComposer,
+          $$UnitOfMeasureTableCreateCompanionBuilder,
+          $$UnitOfMeasureTableUpdateCompanionBuilder,
+          (UnitOfMeasureData, $$UnitOfMeasureTableReferences),
+          UnitOfMeasureData,
+          PrefetchHooks Function({bool recipeIngredientRefs})
+        > {
+  $$UnitOfMeasureTableTableManager(_$AppDatabase db, $UnitOfMeasureTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UnitOfMeasureTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UnitOfMeasureTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UnitOfMeasureTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> symbol = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+              }) => UnitOfMeasureCompanion(
+                id: id,
+                symbol: symbol,
+                name: name,
+                description: description,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String symbol,
+                required String name,
+                Value<String?> description = const Value.absent(),
+              }) => UnitOfMeasureCompanion.insert(
+                id: id,
+                symbol: symbol,
+                name: name,
+                description: description,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$UnitOfMeasureTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({recipeIngredientRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (recipeIngredientRefs) db.recipeIngredient,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (recipeIngredientRefs)
+                    await $_getPrefetchedData<
+                      UnitOfMeasureData,
+                      $UnitOfMeasureTable,
+                      RecipeIngredientData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$UnitOfMeasureTableReferences
+                          ._recipeIngredientRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$UnitOfMeasureTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).recipeIngredientRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.unitOfMeasureId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$UnitOfMeasureTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UnitOfMeasureTable,
+      UnitOfMeasureData,
+      $$UnitOfMeasureTableFilterComposer,
+      $$UnitOfMeasureTableOrderingComposer,
+      $$UnitOfMeasureTableAnnotationComposer,
+      $$UnitOfMeasureTableCreateCompanionBuilder,
+      $$UnitOfMeasureTableUpdateCompanionBuilder,
+      (UnitOfMeasureData, $$UnitOfMeasureTableReferences),
+      UnitOfMeasureData,
+      PrefetchHooks Function({bool recipeIngredientRefs})
     >;
 typedef $$RecipeIngredientTableCreateCompanionBuilder =
     RecipeIngredientCompanion Function({
       Value<int> id,
-      required String unitOfMeasure,
+      required int recipeId,
+      required int ingredientId,
+      required int unitOfMeasureId,
       required double quantity,
     });
 typedef $$RecipeIngredientTableUpdateCompanionBuilder =
     RecipeIngredientCompanion Function({
       Value<int> id,
-      Value<String> unitOfMeasure,
+      Value<int> recipeId,
+      Value<int> ingredientId,
+      Value<int> unitOfMeasureId,
       Value<double> quantity,
     });
+
+final class $$RecipeIngredientTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $RecipeIngredientTable,
+          RecipeIngredientData
+        > {
+  $$RecipeIngredientTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $RecipeTable _recipeIdTable(_$AppDatabase db) => db.recipe.createAlias(
+    $_aliasNameGenerator(db.recipeIngredient.recipeId, db.recipe.id),
+  );
+
+  $$RecipeTableProcessedTableManager get recipeId {
+    final $_column = $_itemColumn<int>('recipe_id')!;
+
+    final manager = $$RecipeTableTableManager(
+      $_db,
+      $_db.recipe,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_recipeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $IngredientTable _ingredientIdTable(_$AppDatabase db) =>
+      db.ingredient.createAlias(
+        $_aliasNameGenerator(
+          db.recipeIngredient.ingredientId,
+          db.ingredient.id,
+        ),
+      );
+
+  $$IngredientTableProcessedTableManager get ingredientId {
+    final $_column = $_itemColumn<int>('ingredient_id')!;
+
+    final manager = $$IngredientTableTableManager(
+      $_db,
+      $_db.ingredient,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ingredientIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $UnitOfMeasureTable _unitOfMeasureIdTable(_$AppDatabase db) =>
+      db.unitOfMeasure.createAlias(
+        $_aliasNameGenerator(
+          db.recipeIngredient.unitOfMeasureId,
+          db.unitOfMeasure.id,
+        ),
+      );
+
+  $$UnitOfMeasureTableProcessedTableManager get unitOfMeasureId {
+    final $_column = $_itemColumn<int>('unit_of_measure_id')!;
+
+    final manager = $$UnitOfMeasureTableTableManager(
+      $_db,
+      $_db.unitOfMeasure,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_unitOfMeasureIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$RecipeIngredientTableFilterComposer
     extends Composer<_$AppDatabase, $RecipeIngredientTable> {
@@ -1345,15 +2360,79 @@ class $$RecipeIngredientTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get unitOfMeasure => $composableBuilder(
-    column: $table.unitOfMeasure,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<double> get quantity => $composableBuilder(
     column: $table.quantity,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$RecipeTableFilterComposer get recipeId {
+    final $$RecipeTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.recipeId,
+      referencedTable: $db.recipe,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeTableFilterComposer(
+            $db: $db,
+            $table: $db.recipe,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$IngredientTableFilterComposer get ingredientId {
+    final $$IngredientTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ingredientId,
+      referencedTable: $db.ingredient,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IngredientTableFilterComposer(
+            $db: $db,
+            $table: $db.ingredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UnitOfMeasureTableFilterComposer get unitOfMeasureId {
+    final $$UnitOfMeasureTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.unitOfMeasureId,
+      referencedTable: $db.unitOfMeasure,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UnitOfMeasureTableFilterComposer(
+            $db: $db,
+            $table: $db.unitOfMeasure,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RecipeIngredientTableOrderingComposer
@@ -1370,15 +2449,79 @@ class $$RecipeIngredientTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get unitOfMeasure => $composableBuilder(
-    column: $table.unitOfMeasure,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<double> get quantity => $composableBuilder(
     column: $table.quantity,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$RecipeTableOrderingComposer get recipeId {
+    final $$RecipeTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.recipeId,
+      referencedTable: $db.recipe,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeTableOrderingComposer(
+            $db: $db,
+            $table: $db.recipe,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$IngredientTableOrderingComposer get ingredientId {
+    final $$IngredientTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ingredientId,
+      referencedTable: $db.ingredient,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IngredientTableOrderingComposer(
+            $db: $db,
+            $table: $db.ingredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UnitOfMeasureTableOrderingComposer get unitOfMeasureId {
+    final $$UnitOfMeasureTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.unitOfMeasureId,
+      referencedTable: $db.unitOfMeasure,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UnitOfMeasureTableOrderingComposer(
+            $db: $db,
+            $table: $db.unitOfMeasure,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RecipeIngredientTableAnnotationComposer
@@ -1393,13 +2536,77 @@ class $$RecipeIngredientTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get unitOfMeasure => $composableBuilder(
-    column: $table.unitOfMeasure,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<double> get quantity =>
       $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  $$RecipeTableAnnotationComposer get recipeId {
+    final $$RecipeTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.recipeId,
+      referencedTable: $db.recipe,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecipeTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recipe,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$IngredientTableAnnotationComposer get ingredientId {
+    final $$IngredientTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ingredientId,
+      referencedTable: $db.ingredient,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IngredientTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ingredient,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UnitOfMeasureTableAnnotationComposer get unitOfMeasureId {
+    final $$UnitOfMeasureTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.unitOfMeasureId,
+      referencedTable: $db.unitOfMeasure,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UnitOfMeasureTableAnnotationComposer(
+            $db: $db,
+            $table: $db.unitOfMeasure,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RecipeIngredientTableTableManager
@@ -1413,16 +2620,13 @@ class $$RecipeIngredientTableTableManager
           $$RecipeIngredientTableAnnotationComposer,
           $$RecipeIngredientTableCreateCompanionBuilder,
           $$RecipeIngredientTableUpdateCompanionBuilder,
-          (
-            RecipeIngredientData,
-            BaseReferences<
-              _$AppDatabase,
-              $RecipeIngredientTable,
-              RecipeIngredientData
-            >,
-          ),
+          (RecipeIngredientData, $$RecipeIngredientTableReferences),
           RecipeIngredientData,
-          PrefetchHooks Function()
+          PrefetchHooks Function({
+            bool recipeId,
+            bool ingredientId,
+            bool unitOfMeasureId,
+          })
         > {
   $$RecipeIngredientTableTableManager(
     _$AppDatabase db,
@@ -1440,27 +2644,117 @@ class $$RecipeIngredientTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> unitOfMeasure = const Value.absent(),
+                Value<int> recipeId = const Value.absent(),
+                Value<int> ingredientId = const Value.absent(),
+                Value<int> unitOfMeasureId = const Value.absent(),
                 Value<double> quantity = const Value.absent(),
               }) => RecipeIngredientCompanion(
                 id: id,
-                unitOfMeasure: unitOfMeasure,
+                recipeId: recipeId,
+                ingredientId: ingredientId,
+                unitOfMeasureId: unitOfMeasureId,
                 quantity: quantity,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String unitOfMeasure,
+                required int recipeId,
+                required int ingredientId,
+                required int unitOfMeasureId,
                 required double quantity,
               }) => RecipeIngredientCompanion.insert(
                 id: id,
-                unitOfMeasure: unitOfMeasure,
+                recipeId: recipeId,
+                ingredientId: ingredientId,
+                unitOfMeasureId: unitOfMeasureId,
                 quantity: quantity,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RecipeIngredientTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback:
+              ({
+                recipeId = false,
+                ingredientId = false,
+                unitOfMeasureId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (recipeId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.recipeId,
+                                    referencedTable:
+                                        $$RecipeIngredientTableReferences
+                                            ._recipeIdTable(db),
+                                    referencedColumn:
+                                        $$RecipeIngredientTableReferences
+                                            ._recipeIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (ingredientId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.ingredientId,
+                                    referencedTable:
+                                        $$RecipeIngredientTableReferences
+                                            ._ingredientIdTable(db),
+                                    referencedColumn:
+                                        $$RecipeIngredientTableReferences
+                                            ._ingredientIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (unitOfMeasureId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.unitOfMeasureId,
+                                    referencedTable:
+                                        $$RecipeIngredientTableReferences
+                                            ._unitOfMeasureIdTable(db),
+                                    referencedColumn:
+                                        $$RecipeIngredientTableReferences
+                                            ._unitOfMeasureIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
         ),
       );
 }
@@ -1475,16 +2769,13 @@ typedef $$RecipeIngredientTableProcessedTableManager =
       $$RecipeIngredientTableAnnotationComposer,
       $$RecipeIngredientTableCreateCompanionBuilder,
       $$RecipeIngredientTableUpdateCompanionBuilder,
-      (
-        RecipeIngredientData,
-        BaseReferences<
-          _$AppDatabase,
-          $RecipeIngredientTable,
-          RecipeIngredientData
-        >,
-      ),
+      (RecipeIngredientData, $$RecipeIngredientTableReferences),
       RecipeIngredientData,
-      PrefetchHooks Function()
+      PrefetchHooks Function({
+        bool recipeId,
+        bool ingredientId,
+        bool unitOfMeasureId,
+      })
     >;
 
 class $AppDatabaseManager {
@@ -1494,6 +2785,8 @@ class $AppDatabaseManager {
       $$IngredientTableTableManager(_db, _db.ingredient);
   $$RecipeTableTableManager get recipe =>
       $$RecipeTableTableManager(_db, _db.recipe);
+  $$UnitOfMeasureTableTableManager get unitOfMeasure =>
+      $$UnitOfMeasureTableTableManager(_db, _db.unitOfMeasure);
   $$RecipeIngredientTableTableManager get recipeIngredient =>
       $$RecipeIngredientTableTableManager(_db, _db.recipeIngredient);
 }
