@@ -9,15 +9,15 @@ class RecipeRepository {
     return _recipeDao.watchAllRecipes();
   }
 
-  Future<void> saveRecipe(RecipeCompanion newRecipe) {
-    return _recipeDao.saveRecipe(newRecipe);
+  Future<int> createRecipe(RecipeCompanion newRecipe) async {
+    return await _recipeDao.createRecipe(newRecipe);
   }
 
-  Future<void> updateRecipe(RecipeCompanion newRecipe) {
-    return _recipeDao.updateRecipe(newRecipe);
+  Future<bool> updateRecipe(RecipeCompanion newRecipe) async {
+    return await _recipeDao.updateRecipe(newRecipe);
   }
 
-  Future<void> deleteRecipe(int id) {
-    return _recipeDao.deleteRecipe(id);
+  Future<int> deleteRecipe(int id) async {
+    return await _recipeDao.deleteRecipe(id);
   }
 }

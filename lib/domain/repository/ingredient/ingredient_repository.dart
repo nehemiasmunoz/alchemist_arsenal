@@ -11,15 +11,15 @@ class IngredientRepository {
     return _ingredientDao.watchAllIngredients();
   }
 
-  Future<void> saveIngredient(IngredientCompanion ingredient) {
-    return _ingredientDao.saveIngredient(ingredient);
+  Future<int> saveIngredient(IngredientCompanion ingredient) async {
+    return await _ingredientDao.saveIngredient(ingredient);
   }
 
-  Future<void> updateIngredient(IngredientCompanion ingredient) {
-    return _ingredientDao.updateIngredient(ingredient);
+  Future<bool> updateIngredient(IngredientCompanion ingredient) async {
+    return await _ingredientDao.updateIngredient(ingredient);
   }
 
-  Future<void> deleteIngredient(int id) {
-    return _ingredientDao.deleteIngredient(id);
+  Future<int> deleteIngredient(int id) async {
+    return await _ingredientDao.deleteIngredient(id);
   }
 }
