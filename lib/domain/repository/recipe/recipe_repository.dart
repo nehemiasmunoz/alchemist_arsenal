@@ -5,6 +5,10 @@ class RecipeRepository {
   final RecipeDao _recipeDao;
   RecipeRepository(RecipeDao recipeDao) : _recipeDao = recipeDao;
 
+  Future<List<RecipeData>> getAllRecipes() async {
+    return await _recipeDao.getAllRecipes();
+  }
+
   Stream<List<RecipeData>> watchAllRecipes() {
     return _recipeDao.watchAllRecipes();
   }

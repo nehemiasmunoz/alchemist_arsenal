@@ -10,6 +10,12 @@ part 'recipe_dao.g.dart';
 class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   RecipeDao(super.attachedDatabase);
 
+  Future<List<RecipeData>> getAllRecipes() async {
+    final result = await (select(recipe)).get();
+    log('Fetching recipes');
+    return result;
+  }
+
   Stream<List<RecipeData>> watchAllRecipes() {
     final result = (select(recipe)).watch();
     log('Watching all recipes');
