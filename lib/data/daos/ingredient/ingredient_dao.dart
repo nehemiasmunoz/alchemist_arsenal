@@ -1,6 +1,8 @@
+import 'dart:developer';
+
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
-import 'package:drift/drift.dart';
 import 'package:alchemist_arsenal/data/source/sqlite/tables/ingredient.dart';
+import 'package:drift/drift.dart';
 
 part 'ingredient_dao.g.dart';
 
@@ -10,20 +12,45 @@ class IngredientDao extends DatabaseAccessor<AppDatabase>
   IngredientDao(super.attachedDatabase);
 
   Stream<List<IngredientData>> watchAllIngredients() {
-    return (select(ingredient)).watch();
+    final result = (select(ingredient)).watch();
+    log("Watching all ingredients");
+    return result;
   }
 
   Future<int> saveIngredient(IngredientCompanion newIngredient) async {
-    return await into(ingredient).insert(newIngredient);
+    final query = into(ingredient).insert(newIngredient);
+    try {
+      final result = await query;
+      log("Ingredient successfully saved $newIngredient");
+      return result;
+    } catch (e, stackTrace) {
+      log("Error saving ingredient $newIngredient $e", stackTrace: stackTrace);
+    }
+    return -1;
   }
 
   Future<bool> updateIngredient(IngredientCompanion newIngredient) async {
-    return await update(ingredient).replace(newIngredient);
+    final query = update(ingredient).replace(newIngredient);
+    try {
+      final result = await query;
+      log("Ingredient successfully updated");
+      return result;
+    } catch (e, stackTrace) {
+      log("Error updating ingredient $newIngredient", stackTrace: stackTrace);
+    }
+    return false;
   }
 
   Future<int> deleteIngredient(int id) async {
-    return await (delete(
-      ingredient,
-    )..where((ingredient) => ingredient.id.equals(id))).go();
+    final query = delete(ingredient)
+      ..where((ingredient) => ingredient.ingredientId.equals(id));
+    try {
+      final result = await query.go();
+      log("Ingredient successfully deleted");
+      return result;
+    } catch (e, stackTrace) {
+      log("Error deleting ingredient id:$id $e", stackTrace: stackTrace);
+    }
+    return -1;
   }
 }

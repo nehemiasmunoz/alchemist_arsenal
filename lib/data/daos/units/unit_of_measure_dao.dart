@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:alchemist_arsenal/data/source/sqlite/app_database.dart';
 import 'package:alchemist_arsenal/data/source/sqlite/tables/tables.dart';
 import 'package:drift/drift.dart';
@@ -10,6 +12,13 @@ class UnitOfMeasureDao extends DatabaseAccessor<AppDatabase>
   UnitOfMeasureDao(super.attachedDatabase);
 
   Future<List<UnitOfMeasureData>> getAllUnits() async {
-    return await select(unitOfMeasure).get();
+    try {
+      final result = await select(unitOfMeasure).get();
+      log("Units successfully fetched");
+      return result;
+    } catch (e, stackTrace) {
+      log("Error fetching units $e", stackTrace: stackTrace);
+    }
+    return [];
   }
 }
