@@ -8,17 +8,22 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     this.validator,
     this.initialValue,
+    this.maxLines,
+    this.maxLength,
   });
   final String label;
   final TextInputType? inputType;
   final TextEditingController controller;
   final FormFieldValidator? validator;
   final String? initialValue;
+  final int? maxLines;
+  final int? maxLength;
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      maxLength: 20,
-      maxLines: 1,
+      maxLength: maxLength,
+      maxLines: maxLines,
       initialValue: initialValue,
       validator: validator,
       controller: controller,

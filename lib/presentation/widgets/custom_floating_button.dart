@@ -12,42 +12,51 @@ class CustomFloatingButton extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0),
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          // mainAxisSize: MainAxisSize.min,
-          children: [
-            Visibility(
-              visible: context.read<RoutesApp>().optionsVisibility,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                spacing: size.width * .05,
-                children: [
-                  ElevatedButton(onPressed: null, child: Text("New Recipe")),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) => CreateEditIngredientScreen(),
-                        ),
-                      );
-                      context.read<RoutesApp>().changeOptionsVisibility(false);
-                    },
-                    child: Text("New Ingredient"),
-                  ),
-                ],
-              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Visibility(
+            visible: context.read<RoutesApp>().optionsVisibility,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              spacing: size.width * .05,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => CreateEditRecipeScreen(),
+                      ),
+                    );
+                    context.read<RoutesApp>().changeOptionsVisibility(false);
+                  },
+                  child: const Text("New Recipe"),
+                ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => CreateEditIngredientScreen(),
+                      ),
+                    );
+                    context.read<RoutesApp>().changeOptionsVisibility(false);
+                  },
+                  child: const Text("New Ingredient"),
+                ),
+              ],
             ),
-            SizedBox(height: size.height * .02),
-            FloatingActionButton(
-              onPressed: () =>
-                  context.read<RoutesApp>().changeOptionsVisibility(null),
-              child: Icon(Icons.add),
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: size.height * .02),
+          FloatingActionButton(
+            onPressed: () =>
+                context.read<RoutesApp>().changeOptionsVisibility(null),
+            child: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
