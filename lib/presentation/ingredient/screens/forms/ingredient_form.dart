@@ -87,7 +87,7 @@ class _IngredientFormState extends State<IngredientForm> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ingredientProvider.submitForm(
-                      widget.ingredientData?.id,
+                      widget.ingredientData?.ingredientId,
                       _titleTFController.text,
                       _priceTFController.text,
                       _descriptionTFController.text,

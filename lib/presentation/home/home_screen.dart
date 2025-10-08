@@ -10,9 +10,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var screenProvider = context.watch<RoutesApp>();
     return Scaffold(
-      appBar: AppBar(title: Text(screenProvider.screenTitle)),
+      appBar: AppBar(title: Text(screenProvider.screenTitle), elevation: .3),
       body: Padding(
-        padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0, vertical: 8.0),
         child: RoutesApp.screens[screenProvider.screenIndex],
       ),
       floatingActionButton: CustomFloatingButton(),

@@ -5,10 +5,13 @@ import 'package:drift/drift.dart';
 class IngredientProvider {
   final IngredientRepository _ingredientRepo;
   IngredientData? recentDeletedIngredient;
+
   IngredientProvider(IngredientRepository ingredientRepo)
     : _ingredientRepo = ingredientRepo;
 
-  Stream<List<IngredientData>> get watchAll => _ingredientRepo.getIngredients();
+  Stream<List<IngredientData>> watchAll() {
+    return _ingredientRepo.getIngredients();
+  }
 
   Future<void> _createIngredient(IngredientCompanion newIngredient) {
     return _ingredientRepo.saveIngredient(newIngredient);
@@ -22,7 +25,7 @@ class IngredientProvider {
     String properties,
   ) {
     IngredientCompanion newIngredient = IngredientCompanion(
-      id: Value.absentIfNull(id),
+      ingredientId: Value.absentIfNull(id),
       title: Value(title),
       price: Value(double.parse(price)),
       description: Value(description),

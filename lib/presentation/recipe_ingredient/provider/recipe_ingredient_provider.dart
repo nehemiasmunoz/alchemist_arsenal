@@ -73,6 +73,5 @@ class RecipeIngredientProvider extends ChangeNotifier {
   void clearIngredients() {
     _ingredients.clear();
     _ingredientsToDelete.clear();
-    notifyListeners();
   }
 }

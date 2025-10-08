@@ -10,15 +10,17 @@ class IngredientsListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //Todo: replace stream with future<list>
     return StreamProvider<List<IngredientData>>(
       initialData: const [],
-      create: (context) => context.read<IngredientProvider>().watchAll,
+      create: (context) => context.read<IngredientProvider>().watchAll(),
       child: Consumer<List<IngredientData>>(
         builder: (context, ingredients, child) {
           if (ingredients.isEmpty) {
             return Center(child: Text("No ingredients found."));
           }
-          return ListView.builder(
+          return ListView.separated(
+            separatorBuilder: (_, __) => Divider(),
             itemCount: ingredients.length,
             itemBuilder: (ctx, i) {
               return _DismissibleIngredientItem(ingredient: ingredients[i]);
@@ -37,32 +39,32 @@ class _DismissibleIngredientItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Dismissible(
-        background: Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          decoration: BoxDecoration(
-            color: Colors.red[300],
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Delete ${ingredient.title}".toUpperCase(),
-                style: TextStyle(color: Colors.white),
-              ),
-              const Icon(Icons.delete, color: Colors.white),
-            ],
-          ),
+    return Dismissible(
+      background: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.red[300],
+          borderRadius: BorderRadius.circular(8.0),
         ),
-        onDismissed: (direction) {
-          context.read<IngredientProvider>().deleteIngredient(ingredient.id);
-        },
-        key: Key(ingredient.toString()),
-        child: _IngredientItem(ingredient: ingredient),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Delete ${ingredient.title}".toUpperCase(),
+              style: TextStyle(color: Colors.white),
+            ),
+            const Icon(Icons.delete, color: Colors.white),
+          ],
+        ),
       ),
+      onDismissed: (direction) {
+        context.read<IngredientProvider>().deleteIngredient(
+          ingredient.ingredientId,
+        );
+      },
+      key: Key(ingredient.toString()),
+      child: _IngredientItem(ingredient: ingredient),
     );
   }
 }
